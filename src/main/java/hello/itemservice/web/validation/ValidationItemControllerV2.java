@@ -48,27 +48,26 @@ public class ValidationItemControllerV2 {
     }
 
     // 새 아이템을 추가하고, 추가된 아이템의 상세 페이지로 리다이렉트
-    // 현재 BindingResult2로 하니까 저장시 입력된 값이 없어지는 현상이 나타남 
+    // 현재 BindingResult2로 하니까 저장시 입력된 값이 없어지는 현상이 나타남
     @PostMapping("/add")
-    public String addItemV1(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) { 
-        
+    public String addItemV2(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
         if (!StringUtils.hasText(item.getItemName())) {
-            bindingResult.addError(new FieldError("item", "itemName", "상품 이름은 필수입니다."));
+        bindingResult.addError(new FieldError("item", "itemName", item.getItemName(), false, null, null, "상품 이름은 필수입니다."));
         }
 
-        if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() > 1000000) {
-            bindingResult.addError(new FieldError("item", "price", "가격은 1,000 ~ 1,000,000 까지 허용합니다."));
+        if (item.getPrice() == null || item.getPrice() < 1000 || item.getPrice() >1000000) { 
+            bindingResult.addError(new FieldError("item", "price", item.getPrice(), false, null, null, "가격은 1,000 ~ 1,000,000 까지 허용합니다."));
         }
 
         if (item.getQuantity() == null || item.getQuantity() >= 10000) {
-            bindingResult.addError(new FieldError("item", "quantity", "수량은 최대 9,999 까지 허용합니다."));
+            bindingResult.addError(new FieldError("item", "quantity", item.getQuantity(), false, null, null, "수량은 최대 9,999 까지 허용합니다."));
         }
-        
-        // 특정 필드 예외가 아닌 전체 예외
+
+     //특정 필드 예외가 아닌 전체 예외
         if (item.getPrice() != null && item.getQuantity() != null) {
             int resultPrice = item.getPrice() * item.getQuantity();
             if (resultPrice < 10000) {
-                bindingResult.addError(new ObjectError("item", "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice));
+                bindingResult.addError(new ObjectError("item", null, null, "가격 * 수량의 합은 10,000원 이상이어야 합니다. 현재 값 = " + resultPrice));
             }
         }
 
@@ -76,8 +75,8 @@ public class ValidationItemControllerV2 {
             log.info("errors={}", bindingResult);
             return "validation/v2/addForm";
         }
-        
-        //성공 로직
+     
+     //성공 로직
         Item savedItem = itemRepository.save(item);
         redirectAttributes.addAttribute("itemId", savedItem.getId());
         redirectAttributes.addAttribute("status", true);
