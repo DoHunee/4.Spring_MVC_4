@@ -48,6 +48,7 @@ public class ValidationItemControllerV2 {
     }
 
     // 새 아이템을 추가하고, 추가된 아이템의 상세 페이지로 리다이렉트
+    // 현재 BindingResult2로 하니까 저장시 입력된 값이 없어지는 현상이 나타남 
     @PostMapping("/add")
     public String addItemV1(@ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) { 
         
