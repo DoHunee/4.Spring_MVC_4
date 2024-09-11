@@ -22,7 +22,8 @@ import java.util.List;
 @RequiredArgsConstructor
 public class ValidationItemControllerV2 {
 
-    private final ItemRepository itemRepository;
+    private final ItemRepository itemRepository; // 아이템 저장소
+    private final ItemValidator itemValidator; //addItemV5에서 사용
 
     // 모든 아이템 목록을 조회하고, 목록 페이지로 이동
     @GetMapping
@@ -163,9 +164,9 @@ public class ValidationItemControllerV2 {
     }
 
     // 국제화된 errors.properties 오류 메시지 코드 사용
-    // rejectValue와 reject는 더 간단한 방식으로 오류를 추가할 수 있으며, 
+    // rejectValue와 reject는 더 간단한 방식으로 오류를 추가할 수 있으며,
     // Spring이 내부적으로 오류 객체를 생성하여 처리합니다. 이 방식은 코드가 간결해지지만, 제어는 다소 제한적일 수 있습니다.
-    @PostMapping("/add")
+    // @PostMapping("/add")
     public String addItemV4(@ModelAttribute Item item, BindingResult bindingResult,
             RedirectAttributes redirectAttributes) {
         log.info("objectName={}", bindingResult.getObjectName());
@@ -187,6 +188,23 @@ public class ValidationItemControllerV2 {
                 bindingResult.reject("totalPriceMin", new Object[] { 10000, resultPrice }, null);
             }
         }
+        if (bindingResult.hasErrors()) {
+            log.info("errors={}", bindingResult);
+            return "validation/v2/addForm";
+        }
+        // 성공 로직
+        Item savedItem = itemRepository.save(item);
+        redirectAttributes.addAttribute("itemId", savedItem.getId());
+        redirectAttributes.addAttribute("status", true);
+        return "redirect:/validation/v2/items/{itemId}";
+    }
+
+    // validation 분리를 통해 코드 간결화
+    @PostMapping("/add")
+    public String addItemV5(@ModelAttribute Item item, BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
+            itemValidator.validate(item, bindingResult);
+
         if (bindingResult.hasErrors()) {
             log.info("errors={}", bindingResult);
             return "validation/v2/addForm";
