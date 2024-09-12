@@ -56,9 +56,10 @@ public class ValidationItemControllerV3 {
 
     // @Validated 어노테이션을 사용하여 검증 로직을 적용
     @PostMapping("/add")
-    public String addItem(@Validated @ModelAttribute Item item, BindingResult bindingResult, RedirectAttributes redirectAttributes) {
+    public String addItem(@Validated @ModelAttribute Item item, BindingResult bindingResult,
+            RedirectAttributes redirectAttributes) {
         // 특정 필드 예외가 아닌 전체 예외
-        if (!bindingResult.hasGlobalErrors()) {  // 전체 오류가 이미 있는지 확인
+        if (!bindingResult.hasGlobalErrors()) { // 전체 오류가 이미 있는지 확인
             if (item.getPrice() != null && item.getQuantity() != null) {
                 int resultPrice = item.getPrice() * item.getQuantity();
                 if (resultPrice < 10000) {
@@ -88,8 +89,25 @@ public class ValidationItemControllerV3 {
     }
 
     // 아이템을 수정하고, 수정된 아이템의 상세 페이지로 리다이렉트
+    // 예외 처리는 컨트롤러 밖으로 분리
     @PostMapping("/{itemId}/edit")
-    public String edit(@PathVariable Long itemId, @ModelAttribute Item item) {
+    public String edit(@PathVariable Long itemId, @Validated @ModelAttribute Item item, BindingResult bindingResult) {
+        // 특정 필드 예외가 아닌 전체 예외
+        if (!bindingResult.hasGlobalErrors()) { // 전체 오류가 이미 있는지 확인
+            if (item.getPrice() != null && item.getQuantity() != null) {
+                int resultPrice = item.getPrice() * item.getQuantity();
+                if (resultPrice < 10000) {
+                    bindingResult.reject("totalPriceMin", new Object[] { 10000, resultPrice }, null);
+                }
+            }
+        }
+
+        if (bindingResult.hasErrors()) {
+            log.info("errors={}", bindingResult);
+            return "validation/v3/editForm";
+        }
+
+        // 성공 로직
         itemRepository.update(itemId, item);
         return "redirect:/validation/v3/items/{itemId}";
     }
