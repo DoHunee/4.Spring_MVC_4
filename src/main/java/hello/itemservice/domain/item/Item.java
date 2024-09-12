@@ -3,6 +3,7 @@ package hello.itemservice.domain.item;
 import lombok.Data;
 import org.hibernate.validator.constraints.Range;
 
+
 import jakarta.validation.constraints.Max;
 import jakarta.validation.constraints.NotBlank;
 import jakarta.validation.constraints.NotNull;
@@ -11,6 +12,8 @@ import jakarta.validation.constraints.NotNull;
 
 
 @Data
+// @ScriptAssert(lang = "javascript", script = "_this.price * _this.quantity >= 10000")
+// Java 15 이상에서는 JavaScript 엔진인 Nashorn이 제거되어 @ScriptAssert 어노테이션 오류가 발생한다
 public class Item {
     private Long id;
     
