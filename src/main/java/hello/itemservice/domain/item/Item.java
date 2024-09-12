@@ -14,7 +14,7 @@ import jakarta.validation.constraints.NotNull;
 public class Item {
     private Long id;
     
-    @NotBlank
+    @NotBlank (message = "공백 X")
     private String itemName;
     
     @NotNull
